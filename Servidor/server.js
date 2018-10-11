@@ -14,5 +14,5 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 app.get('/', controladorCompetencias.mostrarCompetenciasActuales);
 app.get('/generos', controladorCompetencias.cargarGeneros);
-
+app.get('/directores', controladorCompetencias.cargarDirectores);
 app.listen(puerto, function(){console.log("Escuchando puerto:: " + puerto)});

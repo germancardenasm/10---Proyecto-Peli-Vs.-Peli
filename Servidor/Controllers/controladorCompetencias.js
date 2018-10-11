@@ -15,20 +15,25 @@ function mostrarCompetenciasActuales(req, res, fields){
 }       
 
 function cargarGeneros(req, res, fields){
-    console.log("Entro a cargarGeneros");
     var sql = "SELECT * FROM genero";
-
     con.query(sql, function(error, response, fields){
-        debugger;
         var generos = JSON.parse(JSON.stringify(response));
         res.send(JSON.stringify(generos));
     })
+}
 
-
+function cargarDirectores(req, res, fields){
+    var sql = "SELECT * FROM director";
+    con.query(sql, function(error, response, fields){
+        var directores = JSON.parse(JSON.stringify(response));
+        debugger;
+        res.send(JSON.stringify(directores));
+    })
 }
 
 
 module.exports ={
     mostrarCompetenciasActuales: mostrarCompetenciasActuales,
-    cargarGeneros: cargarGeneros
+    cargarGeneros: cargarGeneros,
+    cargarDirectores: cargarDirectores
   }
