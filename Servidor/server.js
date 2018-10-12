@@ -15,4 +15,8 @@ app.use(bodyParser.json());
 app.get('/', controladorCompetencias.mostrarCompetenciasActuales);
 app.get('/generos', controladorCompetencias.cargarGeneros);
 app.get('/directores', controladorCompetencias.cargarDirectores);
+app.get('/actores', controladorCompetencias.cargarActores);
+app.post('/competencias', controladorCompetencias.crearCompetencia);
+app.get('/competencias', controladorCompetencias.consultarCompetencias);
+app.get('/competencias/:id/peliculas', controladorCompetencias.obtenerOpciones);
 app.listen(puerto, function(){console.log("Escuchando puerto:: " + puerto)});
