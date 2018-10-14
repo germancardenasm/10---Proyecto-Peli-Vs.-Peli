@@ -2,12 +2,10 @@ var con = require('../Lib/Connection.js');
 
 
 function mostrarCompetenciasActuales(req, res, fields){
-    console.log("Entro a mostrarCompetenciasActuales");
+   
     var sql = "SELECT count(*) AS total FROM competencias_peliculas";
-
     con.query(sql, function(error, response, fields){
         var total = response[0].total;
-        console.log(total);
         res.send("El numero de competencias en la base es ::" + total);
     })
 
@@ -50,10 +48,10 @@ function obtenerOpciones(req, res, fields){
     var id = req.params.id;
     var sql = "SELECT * FROM competencias where id = " +id;
     con.query(sql, function(error, response, fields){
-        var competencia = response[0].nombre;
-        var actor = response[0].actor;
-        var genero = response[0].genero;
-        var director = response[0].director;
+            var competencia = response[0].nombre;
+            var actor = response[0].actor;
+            var genero = response[0].genero;
+            var director = response[0].director;
         var sqlInfoPelicula = "select pelicula.id,titulo, poster from pelicula join competencias_peliculas on pelicula.id=peli_id AND competencia_id = " + id + ";";
         con.query(sqlInfoPelicula, function(error, response, fields){
         
@@ -71,6 +69,18 @@ function obtenerOpciones(req, res, fields){
     })
 }
 
+function obtenerResultados(req, res, fields){
+    var idCompetencia = req.params.id;
+    var sql = "SELECT  nombre, peli_id, titulo, poster, votos FROM competencias_peliculas JOIN competencias ON competencia_id = competencias.id AND competencias.id = " + idCompetencia +  " JOIN pelicula ON peli_id = pelicula.id ORDER BY votos DESC;";
+    con.query(sql, function(error, response, fields){
+        var competencia = response[0].nombre;
+        var data = {
+            competencia: competencia,
+            resultados: response
+        }
+        res.send(JSON.stringify(data));
+    })
+}
 
 function crearCompetencia(req, res, fields){
     var nombre = res.req.body.nombre
@@ -87,14 +97,24 @@ function crearCompetencia(req, res, fields){
                 
                 for(var i= 0; i< peliculas.length ; i++)
                 {
-                    var sqlPost = "INSERT INTO competencias_peliculas (competencia_id, peli_id , votacion) VALUES (" + response.insertId + "," + peliculas[i].id +"," + 0 + ");"; 
+                    var sqlPost = "INSERT INTO competencias_peliculas (competencia_id, peli_id , votos) VALUES (" + response.insertId + "," + peliculas[i].id +"," + 0 + ");"; 
                     con.query(sqlPost, function(error, response, fields){
                         if(error) return console.log("error al crear la competencia");
-                        console.log("Se añadio la pelicula" + i);
                     })
-                }
-                
+                }   
         })
+    })
+}
+
+function contarVoto(req, res, fields){
+    var idPelicula = req.body.idPelicula;
+    var idCompetencia = req.params.id;
+    
+    var sql = "UPDATE competencias_peliculas SET votos = votos + 1 WHERE competencia_id = " + idCompetencia + " AND peli_id = " + idPelicula + ";" ;
+
+    con.query(sql, function(error, response, fields){
+        if(error) return console.log("Fallo la suma de votos: " + error);
+        res.send(JSON.stringify(""));
     })
     
 }
@@ -106,5 +126,7 @@ module.exports ={
     cargarActores: cargarActores,
     crearCompetencia: crearCompetencia,
     consultarCompetencias: consultarCompetencias,
-    obtenerOpciones: obtenerOpciones
+    obtenerOpciones: obtenerOpciones,
+    contarVoto: contarVoto,
+    obtenerResultados: obtenerResultados
   }

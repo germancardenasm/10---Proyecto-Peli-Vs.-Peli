@@ -17,7 +17,7 @@ CREATE TABLE competencias_peliculas
     id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, -- primary key column
     competencia_id INT(11) UNSIGNED NOT NULL,
     peli_id INT(11) UNSIGNED NOT NULL,
-    votacion INT UNSIGNED NOT NULL,
+    votos INT UNSIGNED NOT NULL,
     FOREIGN KEY  (competencia_id) REFERENCES competencias(id),
     FOREIGN KEY (peli_id) REFERENCES  pelicula(id)
 );
