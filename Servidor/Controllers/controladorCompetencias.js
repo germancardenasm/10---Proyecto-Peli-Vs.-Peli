@@ -129,29 +129,20 @@ function contarVoto(req, res, fields){
 
     con.query(sql, function(error, response, fields){
         if(error) return console.log("Fallo la suma de votos: " + error);
-        var response = {
-            status  : 200,
-            success : 'Updated Successfully'
-        }
-        res.end(JSON.stringify(response));
+        res.status(200).send("Ok");
     })
     
 }
 
 function actualizarCompetencia(req, res, fields){
-    var idCompetencia = req.params.id;
     
+    var idCompetencia = req.params.id;
     var sql = "UPDATE competencias SET nombre = \"" + req.body.nombre + "\" WHERE id= " + idCompetencia + ";" ;
 
     con.query(sql, function(error, response, fields){
         if(error) return console.log("Fallo actualizando el nombre " + error);
-        res.send(JSON.stringify(""));
-    })
-    var response = {
-        status  : 200,
-        success : 'Updated Successfully'
-    }
-    res.end(JSON.stringify(response));
+        res.status(200).send("Ok");
+    }) 
 }
 
 module.exports ={
