@@ -8,11 +8,10 @@ function mostrarCompetenciasActuales(req, res, fields){
         var total = response[0].total;
         res.send("El numero de competencias en la base es ::" + total);
     })
-
-
 }       
 
 function cargarGeneros(req, res, fields){
+    
     var sql = "SELECT * FROM genero";
     con.query(sql, function(error, response, fields){
         var generos = JSON.parse(JSON.stringify(response));
@@ -21,6 +20,7 @@ function cargarGeneros(req, res, fields){
 }
 
 function cargarDirectores(req, res, fields){
+    
     var sql = "SELECT * FROM director";
     con.query(sql, function(error, response, fields){
         var directores = JSON.parse(JSON.stringify(response));
@@ -41,6 +41,14 @@ function consultarCompetencias(req, res, fields){
     con.query(sql, function(error, response, fields){
         var competencias = JSON.parse(JSON.stringify(response));
         res.send(JSON.stringify(competencias));
+    })
+}
+
+function cargarCompetencia(req, res, fields){
+    var idCompetencia = req.params.id;
+    var sql = "SELECT competencias.nombre as nombre, actor.nombre as actor_nombre, genero.nombre as genero_nombre, director.nombre as director_nombre  FROM competencias JOIN actor ON competencias.id = " + idCompetencia + " AND competencias.actor = actor.id LEFT JOIN genero ON competencias.genero = genero.id LEFT JOIN director ON competencias.director=director.id;" 
+    con.query(sql, function(error, response, fields){
+        res.send(JSON.stringify(response[0]));
     })
 }
 
@@ -93,18 +101,25 @@ function crearCompetencia(req, res, fields){
         var peliculas = JSON.parse(JSON.stringify(response));
         var sqlCrearCompetencia = "INSERT INTO competencias (nombre, genero, director, actor) VALUES (" + "\""+ nombre + "\"" + ", " + "\"" +genero +  "\"" + ", " + "\""  + director +  "\"" + ", " + "\"" + actor +  "\"" + ");" 
         con.query(sqlCrearCompetencia, function(error, response, fields){
-                if(error) return console.log("Fallo la creacion: " + error);
+            if(error) return console.log("Fallo la creacion: " + error);
                 
-                for(var i= 0; i< peliculas.length ; i++)
-                {
-                    var sqlPost = "INSERT INTO competencias_peliculas (competencia_id, peli_id , votos) VALUES (" + response.insertId + "," + peliculas[i].id +"," + 0 + ");"; 
-                    con.query(sqlPost, function(error, response, fields){
-                        if(error) return console.log("error al crear la competencia");
-                    })
-                }   
+            for(var i= 0; i< peliculas.length ; i++){
+                var sqlPost = "INSERT INTO competencias_peliculas (competencia_id, peli_id , votos) VALUES (" + response.insertId + "," + peliculas[i].id +"," + 0 + ");"; 
+                con.query(sqlPost, function(error, response, fields){
+                    if(error) return console.log("error al crear la competencia");
+                })
+            }   
+            /* var response = {
+                status  : 200,
+                success : 'Updated Successfully'
+            }
+            res.end(JSON.stringify(response)); */
+            res.status(200).send("Ok");
         })
     })
 }
+
+
 
 function contarVoto(req, res, fields){
     var idPelicula = req.body.idPelicula;
@@ -114,9 +129,29 @@ function contarVoto(req, res, fields){
 
     con.query(sql, function(error, response, fields){
         if(error) return console.log("Fallo la suma de votos: " + error);
-        res.send(JSON.stringify(""));
+        var response = {
+            status  : 200,
+            success : 'Updated Successfully'
+        }
+        res.end(JSON.stringify(response));
     })
     
+}
+
+function actualizarCompetencia(req, res, fields){
+    var idCompetencia = req.params.id;
+    
+    var sql = "UPDATE competencias SET nombre = \"" + req.body.nombre + "\" WHERE id= " + idCompetencia + ";" ;
+
+    con.query(sql, function(error, response, fields){
+        if(error) return console.log("Fallo actualizando el nombre " + error);
+        res.send(JSON.stringify(""));
+    })
+    var response = {
+        status  : 200,
+        success : 'Updated Successfully'
+    }
+    res.end(JSON.stringify(response));
 }
 
 module.exports ={
@@ -125,8 +160,10 @@ module.exports ={
     cargarDirectores: cargarDirectores,
     cargarActores: cargarActores,
     crearCompetencia: crearCompetencia,
+    cargarCompetencia: cargarCompetencia,
     consultarCompetencias: consultarCompetencias,
     obtenerOpciones: obtenerOpciones,
     contarVoto: contarVoto,
-    obtenerResultados: obtenerResultados
+    obtenerResultados: obtenerResultados,
+    actualizarCompetencia: actualizarCompetencia
   }

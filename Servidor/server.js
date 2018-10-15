@@ -19,6 +19,8 @@ app.get('/actores', controladorCompetencias.cargarActores);
 app.post('/competencias', controladorCompetencias.crearCompetencia);
 app.post('/competencias/:id/voto', controladorCompetencias.contarVoto);
 app.get('/competencias', controladorCompetencias.consultarCompetencias);
+app.get('/competencias/:id', controladorCompetencias.cargarCompetencia);
 app.get('/competencias/:id/peliculas', controladorCompetencias.obtenerOpciones);
 app.get('/competencias/:id/resultados', controladorCompetencias.obtenerResultados);
+app.put('/competencias/:id', controladorCompetencias.actualizarCompetencia);
 app.listen(puerto, function(){console.log("Escuchando puerto:: " + puerto)});
