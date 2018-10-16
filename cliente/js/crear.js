@@ -6,6 +6,12 @@ $(function() {
 	competenciasController.cargarDirectores();
 	competenciasController.cargarActores();
 
+	/* $("#genero").change(function(){
+		$("#actor").attr("disabled", "disabled").css('background-color','gray');
+		$("#director").attr("disabled", "disabled").css('background-color','gray');
+	}) */
+
+	
 	// Al enviarse el formulario, se debe ejecutar un POST al servidor
 	$("#formCompetencia").ajaxForm({url: server + '/competencias', type: 'post',
 		// En caso de éxito, se redirige a index.html
