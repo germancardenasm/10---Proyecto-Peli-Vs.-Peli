@@ -68,14 +68,12 @@ function obtenerOpciones(req, res, fields){
 
     con.query(sqlListadoPeliculas, [competenciaId], function(error, response, fields){
 
-            var competencia = response[0].nombre;
-            var actor = response[0].actor;
-            var genero = response[0].genero;
-            var director = response[0].director;
-            var sqlInfoPelicula = "select pelicula.id,titulo, poster from pelicula join competencias_peliculas on pelicula.id=peli_id AND competencia_id = ? order by RAND() LIMIT 0,2;";
-        
+        var competencia = response[0].nombre;
+        var actor = response[0].actor;
+        var genero = response[0].genero;
+        var director = response[0].director;
+        var sqlInfoPelicula = "select pelicula.id,titulo, poster from pelicula join competencias_peliculas on pelicula.id=peli_id AND competencia_id = ? order by RAND() LIMIT 0,2;";
         con.query(sqlInfoPelicula, [competenciaId], function(error, response, fields){
-        
             var opciones = {
                 competencia: competencia,
                 actor:  actor,
@@ -85,16 +83,15 @@ function obtenerOpciones(req, res, fields){
             }
             res.send(JSON.stringify(opciones));
         })
-        
     })
 }
 
 function obtenerResultados(req, res, fields){
 
     var idCompetencia = req.params.id;
-    var sqlListadoPeliculas = "SELECT  nombre, peli_id, titulo, poster, votos FROM competencias_peliculas JOIN competencias ON competencia_id = competencias.id AND competencias.id = " + idCompetencia +  " JOIN pelicula ON peli_id = pelicula.id ORDER BY votos DESC;";
+    var sqlListadoPeliculas = "SELECT  nombre, peli_id, titulo, poster, votos FROM competencias_peliculas JOIN competencias ON competencia_id = competencias.id AND competencias.id = ? JOIN pelicula ON peli_id = pelicula.id ORDER BY votos DESC;";
     
-    con.query(sqlListadoPeliculas, function(error, response, fields){
+    con.query(sqlListadoPeliculas, [idCompetencia], function(error, response, fields){
         var competencia = response[0].nombre;
         var data = {
             competencia: competencia,
@@ -108,32 +105,32 @@ function crearCompetencia(req, res, fields){
 
     var datosDeLaCompetencia = [res.req.body.nombre,res.req.body.genero,res.req.body.director,res.req.body.actor]
     var sqlCrearCompetencia = "INSERT INTO competencias (nombre, genero, director, actor) VALUES (?, ?, ?, ?);" 
-    var sqlPeliculasFiltradas = crearConsulta(res);
+    var sqlPeliculasFiltradas = crearConsultaSql(res);
      
         con.query(sqlCrearCompetencia, datosDeLaCompetencia, function(error, response, fields){
+            
             if(error) return console.log("Fallo la creacion: " + error);
             
             var idCompetencia = response.insertId
             var sqlPost = "INSERT INTO competencias_peliculas (competencia_id, peli_id, votos)" + sqlPeliculasFiltradas
             con.query(sqlPost, [idCompetencia], function(error, response, fields){
                     if(error) return console.log("error al crear la competencia");
+                    res.send(response);
             })
-            
-            res.status(200).send("Ok");
         })  
 }
 
 
-function crearConsulta(res){
+function crearConsultaSql(res){
 
     var sqlListadoPeliculas = " SELECT ?, pelicula.id, 0 FROM pelicula " 
     
     if(res.req.body.actor>0)
-        sqlListadoPeliculas += " JOIN actor_pelicula ON actor_pelicula.describeactor_id = " + res.req.body.actor + " AND pelicula.id = actor_pelicula.pelicula_id"
+        sqlListadoPeliculas += " JOIN actor_pelicula ON actor_pelicula.actor_id = " + res.req.body.actor + " AND pelicula.id = actor_pelicula.pelicula_id"
         else if(res.req.body.genero>0)
                 sqlListadoPeliculas += "where pelicula.genero_id = " + res.req.body.genero 
                 else if(res.req.body.director>0)
-                        sqlListadoPeliculas += "where pelicula.director =  " + res.req.body.director 
+                        sqlListadoPeliculas += "JOIN director where director.id =  " + res.req.body.director +  " AND pelicula.director = director.nombre"
                         else
                             sqlListadoPeliculas = "SELECT pelicula.id FROM pelicula" 
     sqlListadoPeliculas += " order by RAND();"
@@ -149,7 +146,7 @@ function contarVoto(req, res, fields){
     
     con.query(sqlListadoPeliculas, [idCompetencia, idPelicula], function(error, response, fields){
         if(error) return console.log("Fallo la suma de votos: " + error);
-        res.status(200).send(JSON.stringify("Success"));
+        res.send(JSON.stringify(response));
     }) 
 }
 
@@ -160,7 +157,7 @@ function actualizarCompetencia(req, res, fields){
 
     con.query(sqlListadoPeliculas, [req.body.nombre, idCompetencia], function(error, response, fields){
         if(error) return console.log("Fallo actualizando el nombre " + error);
-        res.status(200).send(JSON.stringify("Success"));
+        res.send(JSON.stringify(response));
     }) 
 }
 

@@ -1,8 +1,7 @@
+DROP DATABASE IF EXISTS `competencias`;
+CREATE DATABASE `competencias`;
+USE `competencias`;
 
-DROP TABLE competencias
-DROP TABLE competencias_peliculas
-
--- Create the table in the specified schema
 CREATE TABLE competencias
 (
     id INT(11) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, -- primary key column
