@@ -6,11 +6,20 @@ $(function() {
 	competenciasController.cargarDirectores();
 	competenciasController.cargarActores();
 
-	/* $("#genero").change(function(){
+	$("#genero").change(function(){
 		$("#actor").attr("disabled", "disabled").css('background-color','gray');
 		$("#director").attr("disabled", "disabled").css('background-color','gray');
-	}) */
+	})
 
+	$("#director").change(function(){
+		$("#actor").attr("disabled", "disabled").css('background-color','gray');
+		$("#genero").attr("disabled", "disabled").css('background-color','gray');
+	})
+
+	$("#actor").change(function(){
+		$("#genero").attr("disabled", "disabled").css('background-color','gray');
+		$("#director").attr("disabled", "disabled").css('background-color','gray');
+	})
 	
 	// Al enviarse el formulario, se debe ejecutar un POST al servidor
 	$("#formCompetencia").ajaxForm({url: server + '/competencias', type: 'post',
