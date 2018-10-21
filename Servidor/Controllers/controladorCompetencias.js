@@ -54,10 +54,21 @@ function consultarCompetencias(req, res, fields){
 function cargarCompetencia(req, res, fields){
 
     var idCompetencia = req.params.id;
-    var sqlListadoPeliculas = "SELECT competencias.nombre as nombre, actor.nombre as actor_nombre, genero.nombre as genero_nombre, director.nombre as director_nombre  FROM competencias LEFT JOIN actor ON competencias.id = " + idCompetencia + " AND competencias.actor = actor.id LEFT JOIN genero ON competencias.genero = genero.id LEFT JOIN director ON competencias.director=director.id;" 
+    var sqlListadoPeliculas = "SELECT competencias.nombre as nombre, competencias.actor as actor_nombre, competencias.genero as genero_nombre, competencias.director as director_nombre  FROM competencias WHERE competencias.id = " + idCompetencia + ";" 
     
     con.query(sqlListadoPeliculas, function(error, response, fields){
-        res.send(JSON.stringify(response[0]));
+        
+        if(response[0].actor_nombre)
+           var sql = "SELECT competencias.nombre as nombre, actor.nombre as actor_nombre, competencias.genero as genero_nombre, competencias.director as director_nombre  FROM competencias JOIN actor ON competencias.id = " + idCompetencia + " AND competencias.actor = actor.id;"
+            else if(response[0].genero_nombre)
+                var sql = "SELECT competencias.nombre as nombre, competencias.actor as actor_nombre, genero.nombre as genero_nombre, competencias.director as director_nombre  FROM competencias JOIN genero ON competencias.id = " + idCompetencia + " AND competencias.genero = genero.id;"
+                    else 
+                        var sql = "SELECT competencias.nombre as nombre, competencias.actor as actor_nombre, competencias.genero as genero_nombre, director.nombre as director_nombre  FROM competencias JOIN director ON competencias.id = " + idCompetencia + " AND competencias.director = director.id;"
+        
+                        
+        con.query(sql, function(error, response, fields){
+            res.send(JSON.stringify(response[0]));
+        })
     })
 }
 
@@ -150,7 +161,7 @@ function contarVoto(req, res, fields){
     }) 
 }
 
-function actualizarCompetencia(req, res, fields){
+function editarCompetencia(req, res, fields){
     
     var idCompetencia = req.params.id;
     var sqlListadoPeliculas = "UPDATE competencias SET nombre = ? WHERE id= ? ;" ;
@@ -200,7 +211,7 @@ module.exports ={
     obtenerOpciones: obtenerOpciones,
     contarVoto: contarVoto,
     obtenerResultados: obtenerResultados,
-    actualizarCompetencia: actualizarCompetencia,
+    editarCompetencia: editarCompetencia,
     borrarCompetencia: borrarCompetencia,
     reiniciarCompetencia: reiniciarCompetencia
   }

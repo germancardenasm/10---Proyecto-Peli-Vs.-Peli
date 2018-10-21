@@ -6,6 +6,7 @@ $(function() {
 	competenciasController.cargarDirectores();
 	competenciasController.cargarActores();
 
+	// al crear una competencia solo permite que se seleccione una opcion actor o genero o director
 	$("#genero").change(function(){
 		$("#actor").attr("disabled", "disabled").css('background-color','gray');
 		$("#director").attr("disabled", "disabled").css('background-color','gray');

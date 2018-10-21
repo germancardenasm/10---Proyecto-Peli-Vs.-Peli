@@ -22,7 +22,7 @@ app.get('/competencias/:id/peliculas', controladorCompetencias.obtenerOpciones);
 app.get('/competencias/:id/resultados', controladorCompetencias.obtenerResultados);
 app.post('/competencias', controladorCompetencias.crearCompetencia);
 app.post('/competencias/:id/voto', controladorCompetencias.contarVoto);
-app.put('/competencias/:id', controladorCompetencias.actualizarCompetencia);
+app.put('/competencias/:id', controladorCompetencias.editarCompetencia);
 app.delete('/competencias/:id', controladorCompetencias.borrarCompetencia);
 app.delete('/competencias/:id/votos', controladorCompetencias.reiniciarCompetencia);
 app.listen(puerto, function(){console.log("Escuchando puerto:: " + puerto)});
