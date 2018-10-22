@@ -5,21 +5,16 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "build": "webpack --config webpack/webpack.config.prod.js  --colors",
-    "dev": "webpack-dev-server --open --config webpack/webpack.config.dev.js"
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",
+    "dotenv": "^6.1.0",
     "express": "^4.16.3",
     "mysql": "^2.16.0",
-    "node": "^10.11.0",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.9",
-    "webpack-merge": "^4.1.4"
+    "node": "^10.11.0"
   }
 }
