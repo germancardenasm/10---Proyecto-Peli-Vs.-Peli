@@ -54,11 +54,8 @@ function consultarCompetencias(req, res, fields){
 function cargarCompetencia(req, res, fields){
 
     var idCompetencia = req.params.id;
-    var actor = "";
-    var director = "";
-    var genero = "";
-    //var sqlInfoCompetenciaSeleccionada = "SELECT competencias.nombre as nombre, competencias.actor as actor_id, competencias.genero as genero_id, competencias.director as director_id  FROM competencias WHERE competencias.id = " + idCompetencia + ";" 
-
+    
+    //Sentencia SQL que primero busca todas competencias con sus respectiva informacion y luego la filtra por el ID que se dessea mostrar.
     var sqlInfoCompetenciaSeleccionada  = 
     "SELECT nombre, actor_nombre, genero_nombre, director_nombre from "+
     "(SELECT competencias.id as id, competencias.nombre as nombre, actor.nombre as actor_nombre, genero.nombre as genero_nombre, director.nombre as director_nombre FROM competencias" +
@@ -67,45 +64,18 @@ function cargarCompetencia(req, res, fields){
     
     con.query(sqlInfoCompetenciaSeleccionada, [idCompetencia,idCompetencia,idCompetencia,idCompetencia], function(error, response, fields){
         if(error) return console.log("Fallo obteniendo la informcion de la competencia: " + error);
-        
         res.send(JSON.stringify(response[0]));
-
     })  
-    
-    /*     
-    con.query(sqlInfoCompetenciaSeleccionada, function(error, response, fields){
-        if(error) return console.log("Fallo obteniendo la informcion de la competencia: " + error);
-        var nombre = response[0].nombre;
-        var actor_id = response[0].actor_id;
-        var director_id = response[0].director_id;
-        var genero_id = response[0].genero_id;
 
-        con.query("SELECT nombre FROM actor where id = " + actor_id + ";", function(error, response, fields){
-            if(response.length>0) actor = response[0].nombre;
-
-            con.query("SELECT nombre FROM director where id = " + director_id + ";", function(error, response, fields){
-                if(response.length>0) director = response[0].nombre;
-
-                con.query("SELECT nombre FROM genero where id = " + genero_id + ";", function(error, response, fields){
-                    if(response.length>0) genero = response[0].nombre;
-                    
-                    res.send(JSON.stringify({nombre: nombre ,actor_nombre: actor ,genero_nombre: genero, director_nombre:director}));
-
-                })  
-            })
-        }) 
-         
-
-    })*/
 }
 
-function obtenerOpciones(req, res, fields){
+function obtenerOpcionesAleatorias(req, res, fields){
 
     var competenciaId = req.params.id;
     var sqlListadoPeliculas = "SELECT * FROM competencias where id = ?"
 
     con.query(sqlListadoPeliculas, [competenciaId], function(error, response, fields){
-        if(!response.length) return res.status(404).send("Error, no existe esta competencia!");
+        if(response.length==0) return res.status(404).send("Error, no existe esta competencia!");
         var competencia = response[0].nombre;
         var actor = response[0].actor;
         var genero = response[0].genero;
@@ -130,6 +100,7 @@ function obtenerResultados(req, res, fields){
     var sqlListadoPeliculas = "SELECT  nombre, peli_id, titulo, poster, votos FROM competencias_peliculas JOIN competencias ON competencia_id = competencias.id AND competencias.id = ? JOIN pelicula ON peli_id = pelicula.id ORDER BY votos DESC;";
     
     con.query(sqlListadoPeliculas, [idCompetencia], function(error, response, fields){
+        if(!response.length) return res.status(404).send(JSON.stringify(console.log("La competencia que intenta ver no existe")));
         var competencia = response[0].nombre;
         var data = {
             competencia: competencia,
@@ -147,7 +118,7 @@ function crearCompetencia(req, res, fields){
 
     con.query(sqlFiltrosSeleccionados, 0, function(error, response, fields){     
         if(error) return res.send(error);
-        if(response.length<3)  return res.status(422).send("No se tienen suficientes peliculas con estos criterios para realizar una competencia");
+        if(response.length<2)  return res.status(422).send("No se tienen suficientes peliculas con estos criterios para realizar una competencia");
 
         var sqlCrearCompetencia = "INSERT INTO competencias (nombre, genero, director, actor) VALUES (?, ?, ?, ?);" 
    
@@ -241,7 +212,7 @@ module.exports ={
     crearCompetencia: crearCompetencia,
     cargarCompetencia: cargarCompetencia,
     consultarCompetencias: consultarCompetencias,
-    obtenerOpciones: obtenerOpciones,
+    obtenerOpcionesAleatorias: obtenerOpcionesAleatorias,
     contarVoto: contarVoto,
     obtenerResultados: obtenerResultados,
     editarCompetencia: editarCompetencia,
