@@ -5,22 +5,6 @@ $(function() {
 	competenciasController.cargarGeneros();
 	competenciasController.cargarDirectores();
 	competenciasController.cargarActores();
-
-	// al crear una competencia solo permite que se seleccione una opcion actor o genero o director
-	$("#genero").change(function(){
-		$("#actor").attr("disabled", "disabled").css('background-color','gray');
-		$("#director").attr("disabled", "disabled").css('background-color','gray');
-	})
-
-	$("#director").change(function(){
-		$("#actor").attr("disabled", "disabled").css('background-color','gray');
-		$("#genero").attr("disabled", "disabled").css('background-color','gray');
-	})
-
-	$("#actor").change(function(){
-		$("#genero").attr("disabled", "disabled").css('background-color','gray');
-		$("#director").attr("disabled", "disabled").css('background-color','gray');
-	})
 	
 	// Al enviarse el formulario, se debe ejecutar un POST al servidor
 	$("#formCompetencia").ajaxForm({url: server + '/competencias', type: 'post',
