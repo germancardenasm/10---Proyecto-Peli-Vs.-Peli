@@ -1,33 +1,23 @@
 var con = require('../Lib/Connection.js');
-  
 
 function cargarGeneros(req, res, fields){
-    
-    var sqlListadoPeliculas = "SELECT * FROM genero";
-    
-    con.query(sqlListadoPeliculas, function(error, response, fields){
-        var generos = JSON.parse(JSON.stringify(response));
-        res.send(JSON.stringify(generos));
-    })
+    cargarFiltros("genero", res);
 }
 
 function cargarDirectores(req, res, fields){
-    
-    var sqlListadoPeliculas = "SELECT * FROM director";
-    
-    con.query(sqlListadoPeliculas, function(error, response, fields){
-        var directores = JSON.parse(JSON.stringify(response));
-        res.send(JSON.stringify(directores));
-    })
+    cargarFiltros("director", res);
 }
 
 function cargarActores(req, res, fields){
+    cargarFiltros("actor", res);
+}
 
-    var sqlListadoPeliculas = "SELECT * FROM actor";
+function cargarFiltros(opcion, res){
    
-    con.query(sqlListadoPeliculas, function(error, response, fields){
-        var actor = JSON.parse(JSON.stringify(response));
-        res.send(JSON.stringify(actor));
+    con.query("SELECT * FROM " + opcion,  function(error, response, fields){
+        var respuesta = JSON.parse(JSON.stringify(response));
+        res.send(JSON.stringify(respuesta));
+        return;
     })
 }
 
@@ -43,9 +33,9 @@ function mostrarCompetenciasActuales(req, res, fields){
 
 function consultarCompetencias(req, res, fields){
 
-    var sqlListadoPeliculas = "SELECT * FROM competencias";
+    var sqlListadoCompetencias = "SELECT * FROM competencias";
     
-    con.query(sqlListadoPeliculas, function(error, response, fields){
+    con.query(sqlListadoCompetencias, function(error, response, fields){
         var competencias = JSON.parse(JSON.stringify(response));
         res.send(JSON.stringify(competencias));
     })
@@ -80,8 +70,8 @@ function obtenerOpcionesAleatorias(req, res, fields){
         var actor = response[0].actor;
         var genero = response[0].genero;
         var director = response[0].director;
-        var sqlInfoPelicula = "select pelicula.id,titulo, poster from pelicula join competencias_peliculas on pelicula.id=peli_id AND competencia_id = ? order by RAND() LIMIT 0,2;";
-        con.query(sqlInfoPelicula, [competenciaId], function(error, response, fields){
+        var sqlPeliculasAleatorias = "select pelicula.id,titulo, poster from pelicula join competencias_peliculas on pelicula.id=peli_id AND competencia_id = ? order by RAND() LIMIT 0,2;";
+        con.query(sqlPeliculasAleatorias, [competenciaId], function(error, response, fields){
             var opciones = {
                 competencia: competencia,
                 actor:  actor,
@@ -122,7 +112,6 @@ function crearCompetencia(req, res, fields){
 
         var sqlCrearCompetencia = "INSERT INTO competencias (nombre, genero, director, actor) VALUES (?, ?, ?, ?);" 
    
-     
         con.query(sqlCrearCompetencia, datosDeLaCompetencia, function(error, response, fields){
             
             if(error) return res.send(error);
@@ -140,15 +129,12 @@ function crearCompetencia(req, res, fields){
 function crearConsultaSqlFiltrosSeleccionados(res){
 
     var sqlListadoPeliculas = " SELECT ?, pelicula.id, 0 FROM pelicula " 
-    
     if(res.req.body.actor>0)
         sqlListadoPeliculas += " JOIN actor_pelicula ON actor_pelicula.actor_id = " + res.req.body.actor + " AND pelicula.id = actor_pelicula.pelicula_id"
     if(res.req.body.director>0)
         sqlListadoPeliculas += " JOIN director ON director.id =  " + res.req.body.director +  " AND pelicula.director = director.nombre"
     if(res.req.body.genero>0)
         sqlListadoPeliculas += " where pelicula.genero_id = " + res.req.body.genero 
-    if(res.req.body.director==0 && res.req.body.genero==0 && res.req.body.actor==0 )
-        sqlListadoPeliculas = "SELECT pelicula.id FROM pelicula" 
     
     sqlListadoPeliculas += " order by RAND();"
     return sqlListadoPeliculas;
@@ -158,9 +144,9 @@ function contarVoto(req, res, fields){
 
     var idPelicula = req.body.idPelicula;
     var idCompetencia = req.params.id;
-    var sqlListadoPeliculas = "UPDATE competencias_peliculas SET votos = votos + 1 WHERE competencia_id = ? AND peli_id = ?;" ;
+    var sqlSumarVoto = "UPDATE competencias_peliculas SET votos = votos + 1 WHERE competencia_id = ? AND peli_id = ?;" ;
     
-    con.query(sqlListadoPeliculas, [idCompetencia, idPelicula], function(error, response, fields){
+    con.query(sqlSumarVoto, [idCompetencia, idPelicula], function(error, response, fields){
         if(error) return console.log("Fallo la suma de votos: " + error);
         res.send(JSON.stringify(response));
     }) 
@@ -169,9 +155,9 @@ function contarVoto(req, res, fields){
 function editarCompetencia(req, res, fields){
     
     var idCompetencia = req.params.id;
-    var sqlListadoPeliculas = "UPDATE competencias SET nombre = ? WHERE id= ? ;" ;
+    var sqlActualizarCompetencia = "UPDATE competencias SET nombre = ? WHERE id= ? ;" ;
 
-    con.query(sqlListadoPeliculas, [req.body.nombre, idCompetencia], function(error, response, fields){
+    con.query(sqlActualizarCompetencia, [req.body.nombre, idCompetencia], function(error, response, fields){
         if(error) return console.log("Fallo actualizando el nombre " + error);
         res.send(JSON.stringify(response));
     }) 
@@ -180,13 +166,14 @@ function editarCompetencia(req, res, fields){
 function borrarCompetencia(req, res, fields){
     
     var idCompetencia = req.params.id;
-    var sqlListadoPeliculas = "DELETE FROM competencias_peliculas WHERE competencia_id = ?;"
+    var sqlBorradoCompetanciaVotacion = "DELETE FROM competencias_peliculas WHERE competencia_id = ?;"
 
-    con.query(sqlListadoPeliculas, [idCompetencia], function(error, response, fields){
+    con.query(sqlBorradoCompetanciaVotacion, [idCompetencia], function(error, response, fields){
         if(error) return console.log("Fallo borrando registros de votacion");
-        var sqlBorrar = "DELETE FROM competencias WHERE id = ?;"
-        con.query(sqlBorrar, [idCompetencia], function(error, response, fields){
-            if(error) return console.log("Fallo borrando registro de COmpetencia " + error);
+        var sqlBorrarCompetencia = "DELETE FROM competencias WHERE id = ?";
+
+        con.query(sqlBorrarCompetencia, [idCompetencia], function(error, response, fields){
+            if(error) return console.log("Fallo borrando registro de Competencia " + error);
             res.send(JSON.stringify(response));
         }) 
     }) 
